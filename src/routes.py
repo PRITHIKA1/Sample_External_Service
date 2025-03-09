@@ -1,7 +1,26 @@
-from fastapi import APIRouter, HTTPException
+from opentelemetry import trace
+
+from fastapi import APIRouter, HTTPException, FastAPI
+from opentelemetry.instrumentation.requests import RequestsInstrumentor
+from opentelemetry.instrumentation.httpx import HTTPXClientInstrumentor
+import sys
+from opentelemetry.instrumentation.logging import LoggingInstrumentor
 import httpx
 from pymongo import MongoClient
 import redis
+import logging
+
+app = FastAPI()
+tracer = trace.get_tracer(__name__)
+logging.basicConfig(level=logging.INFO)
+
+# Configure logging
+LoggingInstrumentor().instrument()
+logging.basicConfig(level=logging.INFO, stream=sys.stdout)
+logger = logging.getLogger(__name__)
+
+RequestsInstrumentor().instrument()
+HTTPXClientInstrumentor().instrument()
 
 router = APIRouter()
 
